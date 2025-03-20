@@ -1,4 +1,111 @@
 <!DOCTYPE html>
-<html lang=en>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Chat</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f4f4f4;
+        }
+        .chat-container {
+            width: 100%;
+            max-width: 500px;
+            margin: 20px auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .chat-box {
+            height: 300px;
+            overflow-y: auto;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+        }
+        .message {
+            margin: 5px 0;
+            padding: 8px;
+            border-radius: 5px;
+        }
+        .user {
+            background: #d1e7fd;
+            align-self: flex-end;
+        }
+        .bot {
+            background: #e2e2e2;
+        }
+        .input-box {
+            display: flex;
+            margin-top: 10px;
+        }
+        input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 5px;
+        }
+    </style>
+</head>
 <body>
-<h1>hello</h1>
+
+    <div class="chat-container">
+        <div class="chat-box" id="chatBox"></div>
+        <div class="input-box">
+            <input type="text" id="userInput" placeholder="Type a message...">
+            <button onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+    <script>
+        function sendMessage() {
+            let inputField = document.getElementById("userInput");
+            let message = inputField.value.trim();
+            if (message === "") return;
+
+            // Add user message to chat
+            addMessage("You: " + message, "user");
+
+            // Simple bot response
+            setTimeout(() => {
+                let response = getBotResponse(message);
+                addMessage("Bot: " + response, "bot");
+            }, 500);
+
+            inputField.value = "";
+        }
+
+        function addMessage(text, className) {
+            let chatBox = document.getElementById("chatBox");
+            let msgDiv = document.createElement("div");
+            msgDiv.classList.add("message", className);
+            msgDiv.textContent = text;
+            chatBox.appendChild(msgDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function getBotResponse(input) {
+            let responses = {
+                "hello": "Hi there!",
+                "how are you": "I'm just a bot, but I'm doing great!",
+                "bye": "Goodbye! Have a great day!"
+            };
+            let lowerInput = input.toLowerCase();
+            return responses[lowerInput] || "I'm not sure how to respond to that.";
+        }
+    </script>
+
+</body>
+</html>
