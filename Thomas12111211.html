@@ -3,155 +3,107 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Live Chat with Login</title>
+    <title>2D Minecraft</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background: #f4f4f4;
-        }
-        .container {
-            width: 100%;
-            max-width: 500px;
-            margin: 50px auto;
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             text-align: center;
         }
-        .chat-box {
-            height: 300px;
-            overflow-y: auto;
-            border-bottom: 1px solid #ddd;
-            padding-bottom: 10px;
-            margin-bottom: 10px;
+
+        #game {
+            display: inline-block;
+            margin-top: 20px;
         }
-        .message {
-            margin: 5px 0;
-            padding: 8px;
-            border-radius: 5px;
-            text-align: left;
+
+        #world {
+            display: grid;
+            grid-template-columns: repeat(10, 50px);
+            grid-template-rows: repeat(10, 50px);
+            gap: 1px;
         }
-        .user {
-            background: #d1e7fd;
-            text-align: right;
+
+        .block {
+            width: 50px;
+            height: 50px;
+            background-color: lightgreen;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
         }
-        .bot {
-            background: #e2e2e2;
-        }
-        .input-box {
-            display: flex;
-            margin-top: 10px;
-        }
-        input {
-            flex: 1;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-        }
-        button {
-            padding: 10px;
-            background: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-left: 5px;
-        }
-        #loginScreen {
-            display: block;
-        }
-        #chatScreen {
-            display: none;
+
+        .character {
+            background-color: blue;
         }
     </style>
 </head>
 <body>
-
-    <!-- Login Screen -->
-    <div class="container" id="loginScreen">
-        <h2>Login to Chat</h2>
-        <input type="text" id="username" placeholder="Enter your name">
-        <button onclick="login()">Join Chat</button>
-    </div>
-
-    <!-- Chat Screen -->
-    <div class="container" id="chatScreen">
-        <h2>Live Chat</h2>
-        <button onclick="logout()" style="float: right; background: red;">Logout</button>
-        <div class="chat-box" id="chatBox"></div>
-        <div class="input-box">
-            <input type="text" id="userInput" placeholder="Type a message...">
-            <button onclick="sendMessage()">Send</button>
+    <h1>2D Minecraft</h1>
+    <div id="game">
+        <div id="world"></div>
+        <div id="inventory">
+            <button id="placeBlock">Place Block</button>
+            <button id="removeBlock">Remove Block</button>
         </div>
     </div>
-
     <script>
-        let username = "";
+        document.addEventListener('DOMContentLoaded', () => {
+            const world = document.getElementById('world');
+            const placeBlockButton = document.getElementById('placeBlock');
+            const removeBlockButton = document.getElementById('removeBlock');
+            const worldSize = 10;
+            const blocks = [];
 
-        function login() {
-            let input = document.getElementById("username").value.trim();
-            if (input === "") {
-                alert("Please enter a valid name!");
-                return;
+            // Initialize the world grid
+            for (let i = 0; i < worldSize; i++) {
+                for (let j = 0; j < worldSize; j++) {
+                    const block = document.createElement('div');
+                    block.className = 'block';
+                    block.dataset.row = i;
+                    block.dataset.col = j;
+                    blocks.push(block);
+                    world.appendChild(block);
+                }
             }
-            username = input;
-            localStorage.setItem("chatUser", username);
-            document.getElementById("loginScreen").style.display = "none";
-            document.getElementById("chatScreen").style.display = "block";
-        }
 
-        function logout() {
-            localStorage.removeItem("chatUser");
-            document.getElementById("loginScreen").style.display = "block";
-            document.getElementById("chatScreen").style.display = "none";
-        }
+            // Place the character in the middle of the grid
+            const character = document.createElement('div');
+            character.className = 'block character';
+            let characterPosition = { row: Math.floor(worldSize / 2), col: Math.floor(worldSize / 2) };
+            updateCharacterPosition();
 
-        function sendMessage() {
-            let inputField = document.getElementById("userInput");
-            let message = inputField.value.trim();
-            if (message === "") return;
+            document.addEventListener('keydown', (e) => {
+                switch (e.key) {
+                    case 'ArrowUp':
+                        if (characterPosition.row > 0) characterPosition.row--;
+                        break;
+                    case 'ArrowDown':
+                        if (characterPosition.row < worldSize - 1) characterPosition.row++;
+                        break;
+                    case 'ArrowLeft':
+                        if (characterPosition.col > 0) characterPosition.col--;
+                        break;
+                    case 'ArrowRight':
+                        if (characterPosition.col < worldSize - 1) characterPosition.col++;
+                        break;
+                }
+                updateCharacterPosition();
+            });
 
-            addMessage(username + ": " + message, "user");
-
-            setTimeout(() => {
-                let response = getBotResponse(message);
-                addMessage("Bot: " + response, "bot");
-            }, 500);
-
-            inputField.value = "";
-        }
-
-        function addMessage(text, className) {
-            let chatBox = document.getElementById("chatBox");
-            let msgDiv = document.createElement("div");
-            msgDiv.classList.add("message", className);
-            msgDiv.textContent = text;
-            chatBox.appendChild(msgDiv);
-            chatBox.scrollTop = chatBox.scrollHeight;
-        }
-
-        function getBotResponse(input) {
-            let responses = {
-                "hello": "Hi there!",
-                "how are you": "I'm just a bot, but I'm doing great!",
-                "bye": "Goodbye! Have a great day!"
-            };
-            let lowerInput = input.toLowerCase();
-            return responses[lowerInput] || "I'm not sure how to respond to that.";
-        }
-
-        window.onload = function () {
-            let savedUser = localStorage.getItem("chatUser");
-            if (savedUser) {
-                username = savedUser;
-                document.getElementById("loginScreen").style.display = "none";
-                document.getElementById("chatScreen").style.display = "block";
+            function updateCharacterPosition() {
+                blocks.forEach(block => block.classList.remove('character'));
+                const index = characterPosition.row * worldSize + characterPosition.col;
+                blocks[index].classList.add('character');
             }
-        };
+
+            placeBlockButton.addEventListener('click', () => {
+                const index = characterPosition.row * worldSize + characterPosition.col;
+                blocks[index].style.backgroundColor = 'brown';
+            });
+
+            removeBlockButton.addEventListener('click', () => {
+                const index = characterPosition.row * worldSize + characterPosition.col;
+                blocks[index].style.backgroundColor = 'lightgreen';
+            });
+        });
     </script>
-
 </body>
 </html>
