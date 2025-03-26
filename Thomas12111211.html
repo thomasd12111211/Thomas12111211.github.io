@@ -8,6 +8,7 @@
         body {
             font-family: Arial, sans-serif;
             text-align: center;
+            background-color: #f0f0f0;
         }
 
         #game {
@@ -33,6 +34,24 @@
         .character {
             background-color: blue;
         }
+
+        #inventory {
+            margin-top: 20px;
+        }
+
+        .inventory-item {
+            display: inline-block;
+            width: 50px;
+            height: 50px;
+            margin: 0 10px;
+            border: 1px solid #ccc;
+            background-color: #fff;
+            cursor: pointer;
+        }
+
+        .selected {
+            border: 2px solid #000;
+        }
     </style>
 </head>
 <body>
@@ -40,17 +59,18 @@
     <div id="game">
         <div id="world"></div>
         <div id="inventory">
-            <button id="placeBlock">Place Block</button>
-            <button id="removeBlock">Remove Block</button>
+            <div class="inventory-item" data-type="dirt" style="background-color: brown;"></div>
+            <div class="inventory-item" data-type="grass" style="background-color: lightgreen;"></div>
+            <div class="inventory-item" data-type="stone" style="background-color: gray;"></div>
         </div>
     </div>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const world = document.getElementById('world');
-            const placeBlockButton = document.getElementById('placeBlock');
-            const removeBlockButton = document.getElementById('removeBlock');
+            const inventoryItems = document.querySelectorAll('.inventory-item');
             const worldSize = 10;
             const blocks = [];
+            let selectedBlockType = 'dirt';
 
             // Initialize the world grid
             for (let i = 0; i < worldSize; i++) {
@@ -94,14 +114,28 @@
                 blocks[index].classList.add('character');
             }
 
-            placeBlockButton.addEventListener('click', () => {
-                const index = characterPosition.row * worldSize + characterPosition.col;
-                blocks[index].style.backgroundColor = 'brown';
+            inventoryItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    inventoryItems.forEach(i => i.classList.remove('selected'));
+                    item.classList.add('selected');
+                    selectedBlockType = item.dataset.type;
+                });
             });
 
-            removeBlockButton.addEventListener('click', () => {
-                const index = characterPosition.row * worldSize + characterPosition.col;
-                blocks[index].style.backgroundColor = 'lightgreen';
+            world.addEventListener('click', (e) => {
+                if (e.target.classList.contains('block') && !e.target.classList.contains('character')) {
+                    switch (selectedBlockType) {
+                        case 'dirt':
+                            e.target.style.backgroundColor = 'brown';
+                            break;
+                        case 'grass':
+                            e.target.style.backgroundColor = 'lightgreen';
+                            break;
+                        case 'stone':
+                            e.target.style.backgroundColor = 'gray';
+                            break;
+                    }
+                }
             });
         });
     </script>
